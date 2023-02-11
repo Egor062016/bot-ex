@@ -16,8 +16,32 @@ def start_markup():
 
 @bot.message_handler(commands=["start"])
 def start(message):
+    status = ['creator', 'administrator', 'member']
+    for i in status:
+        if i == bot.get_chat_member(chat_id='-1001538332180',
+                                    user_id=message.chat.id).status:
 
-    bot.send_message(message.chat.id, 'Чтобы пользоваться ботом подпишись на нашу биржу!', reply_markup=start_markup())
+            if message.chat.id in banned_users:
+                bot.send_message(message.chat.id,
+                                 "Вы заблокированы в боте⛔ Для разблокировки напишите админу (@EgorSelischev)")
+
+            else:
+                markup = types.InlineKeyboardMarkup(row_width=1)
+                item = types.InlineKeyboardButton('Выложить объявление', callback_data='post1')
+                item1 = types.InlineKeyboardButton('Поддержка', url='https://t.me/EgorSelischev')
+                item2 = types.InlineKeyboardButton('Правила', url='https://telegra.ph/Pravila-ispolzovaniya-12-13')
+
+                markup.add(item, item1, item2)
+
+                bot.send_message(message.chat.id,
+                                 f'Привет👋 Я менеджер <a href="https://t.me/YouTubeBirz">ютуб-биржи</a>.\nЧтобы выложить объявление, выбери соответсвующий раздел ниже.',
+                                 parse_mode='html', reply_markup=markup)
+
+            break
+    else:
+        bot.send_message(message.chat.id, 'Чтобы пользоваться ботом подпишись на нашу биржу!', reply_markup=start_markup())
+
+
 
 
 def check(call):
@@ -71,6 +95,14 @@ def callback(call):
                         markup.add(item, item1, item2)
 
                         mesg = bot.send_message(call.message.chat.id, 'Чтобы выложить объявление, отправь мне его')
+
+                        @bot.message_handler(commands=["start"])
+                        def start(message):
+
+                            bot.send_message(message.chat.id, 'Чтобы пользоваться ботом подпишись на нашу биржу!',
+                                             reply_markup=start_markup())
+                            return True
+
                         bot.register_next_step_handler(mesg, post)
 
                     break
@@ -101,17 +133,21 @@ def post(message):
                                  "Вы заблокированы в боте⛔ Для разблокировки напишите админу (@EgorSelischev)")
 
             else:
-                bot.forward_message(TO_CHAT_ID, message.chat.id, message.message_id)
-                bot.send_message(1807653203, f'Пост от @{message.from_user.username}')
+                if message.text == '/start':
+                    start(message)
 
-                markup = types.InlineKeyboardMarkup(row_width=1)
-                item = types.InlineKeyboardButton('Выложить объявление', callback_data='post1')
-                item1 = types.InlineKeyboardButton('Поддержка', url='https://t.me/EgorSelischev')
-                item2 = types.InlineKeyboardButton('Правила', url='https://telegra.ph/Pravila-ispolzovaniya-12-13')
+                else:
+                    bot.forward_message(TO_CHAT_ID, message.chat.id, message.message_id)
+                    bot.send_message(1807653203, f'Пост от @{message.from_user.username}')
 
-                markup.add(item, item1, item2)
+                    markup = types.InlineKeyboardMarkup(row_width=1)
+                    item = types.InlineKeyboardButton('Выложить объявление', callback_data='post1')
+                    item1 = types.InlineKeyboardButton('Поддержка', url='https://t.me/EgorSelischev')
+                    item2 = types.InlineKeyboardButton('Правила', url='https://telegra.ph/Pravila-ispolzovaniya-12-13')
 
-                bot.send_message(message.chat.id, 'Пост был успешно опубликован✅', reply_markup=markup)
+                    markup.add(item, item1, item2)
+
+                    bot.send_message(message.chat.id, 'Пост был успешно опубликован✅', reply_markup=markup)
 
             break
     else:
